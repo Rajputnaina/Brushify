@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brushify</title>
+    <!-- Modern typography via Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet">
+    <!-- html2canvas for real PNG export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+    <style>
+        /* Reset & Studio Theme Variables */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-studio: #f4f6f9;
+            --surface-white: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --border-subtle: #e5e7eb;
+            --accent-primary: #4f46e5;
+            --accent-hover: #4338ca;
+            --shadow-card: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            --shadow-panel: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+        }
+
+        body {
+            margin: 0;
+            padding: 24px 16px 48px;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #ffffff 0%, var(--bg-studio) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Sleek Studio Header */
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #111827 0%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            margin: 6px 0 0;
+            font-size: 0.925rem;
+            color: var(--text-secondary);
+        }
+
+        /* Main Workspace Container */
+        .workspace {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* Refined Editable Canvas Card (#box) */
+        #box {
+            width: 100%;
+            max-width: 360px;
+            min-height: 360px;
+            padding: 32px;
+            background-color: #ffffff;
+            color: #111827;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            /* Proper CSS box-shadow without commas */
+            box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.14), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 1.45;
+            word-break: break-word;
+            outline: none;
+            cursor: text;
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.25s ease;
+        }
+
+        #box:hover {
+            box-shadow: 0 24px 42px -10px rgba(15, 23, 42, 0.18), 0 6px 16px -2px rgba(15, 23, 42, 0.08);
+        }
+
+        #box:focus {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.22), 0 24px 42px -10px rgba(15, 23, 42, 0.18);
+        }
+
+        /* Placeholder hint when #box is empty */
+        #box:empty::before {
+            content: attr(data-placeholder);
+            opacity: 0.45;
+            pointer-events: none;
+            font-style: italic;
+        }
+
+        /* Primary Download Pill Button (#dwd-btn) */
+        .action-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #dwd-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 44px;
+            padding: 0 28px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #6366f1 100%);
+            border: none;
+            border-radius: 9999px;
+            box-shadow: 0 6px 16px -2px rgba(79, 70, 229, 0.4);
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        #dwd-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-primary) 100%);
+            box-shadow: 0 10px 22px -2px rgba(79, 70, 229, 0.5);
+        }
+
+        #dwd-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.4);
+        }
+
+        #status-msg {
+            font-size: 0.8rem;
+            color: #059669;
+            font-weight: 500;
+            min-height: 18px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        #status-msg.visible {
+            opacity: 1;
+        }
+
+        /* Responsive Studio Control Panel (#second) */
+        #second {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            background: var(--surface-white);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-panel);
+        }
+
+        #bg-color, #text-color, #fonts {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 14px;
+            border: 1px solid #f1f5f9;
+        }
+
+        #second h2 {
+            margin: 0;
+            font-size: 0.825rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+        }
+
+        /* Color Swatches Grid */
+        .swatch-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #bg-color button, #text-color button {
+            height: 34px;
+            width: 34px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.14), 0 2px 4px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+            padding: 0;
+        }
+
+        #bg-color button:hover, #text-color button:hover {
+            transform: scale(1.16);
+            box-shadow: 0 0 0 2px var(--accent-primary), 0 4px 8px rgba(0, 0, 0, 0.14);
+        }
+
+        #bg-color button.active, #text-color button.active {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 2.5px var(--accent-primary), 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Font Selector Pills */
+        .font-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        #fonts button {
+            height: 38px;
+            padding: 0 16px;
+            font-size: 0.925rem;
+            color: var(--text-primary);
+            background-color: var(--surface-white);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            text-transform: capitalize;
+        }
+
+        #fonts button:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background-color: #eef2ff;
+            transform: translateY(-1px);
+        }
+
+        #fonts button.active {
+            background-color: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+        }
+
+        @media (max-width: 640px) {
+            #box {
+                min-height: 290px;
+                padding: 24px;
+                font-size: 20px;
+            }
+            #second {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Brushify</h1>
+        <p class="subtitle">Design &amp; export minimalist quote cards in seconds</p>
+    </header>
+
+    <main class="workspace">
+        <!-- Editable Quote Canvas -->
+        <div id="box" contenteditable="true" data-placeholder="Click here and start typing your quote..." style="font-family: serif;"></div>
+
+        <!-- Primary Export Action -->
+        <div class="action-bar">
+            <button id="dwd-btn" type="button">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download PNG
+            </button>
+            <span id="status-msg" role="status" aria-live="polite"></span>
+        </div>
+
+        <!-- Control Panel (#second) -->
+        <section id="second" aria-label="Card customization controls">
+            <!-- Background Color Picker -->
+            <div id="bg-color">
+                <h2>Background Color</h2>
+                <div class="swatch-grid">
+                    <button type="button" aria-label="Red background" onclick="changeBackgroundColor('red', this)" style="background-color:red;"></button>
+                    <button type="button" aria-label="Green background" onclick="changeBackgroundColor('green', this)" style="background-color:green;"></button>
+                    <button type="button" aria-label="Slate blue background" onclick="changeBackgroundColor('rgb(87,87,110)', this)" style="background-color:rgb(87, 87, 110);"></button>
+                    <button type="button" aria-label="Yellow background" onclick="changeBackgroundColor('yellow', this)" style="background-color:yellow;"></button>
+                    <button type="button" aria-label="Mauve background" onclick="changeBackgroundColor('rgb(159,130,159)', this)" style="background-color:rgb(159, 130, 159);"></button>
+                    <button type="button" aria-label="Burgundy background" onclick="changeBackgroundColor('rgb(88,46,53)', this)" style="background-color:rgb(88, 46, 53);"></button>
+                    <button type="button" aria-label="Espresso background" onclick="changeBackgroundColor('rgb(63,56,42)', this)" style="background-color:rgb(63, 56, 42);"></button>
+                    <button type="button" aria-label="Alice blue background" onclick="changeBackgroundColor('aliceblue', this)" style="background-color:aliceblue;"></button>
+                    <button type="button" aria-label="Gray background" onclick="changeBackgroundColor('gray', this)" style="background-color:gray;"></button>
+                    <button type="button" aria-label="Aquamarine background" onclick="changeBackgroundColor('aquamarine', this)" style="background-color:aquamarine;"></button>
+                </div>
+            </div>
+
+            <!-- Text Color Picker -->
+            <div id="text-color">
+                <h2>Text Color</h2>
+                <div class="swatch-grid">
+                    <button type="button" aria-label="Red text" onclick="changeTextColor('red', this)" style="background-color:red;"></button>
+                    <button type="button" aria-label="Green text" onclick="changeTextColor('green', this)" style="background-color:green;"></button>
+                    <button type="button" aria-label="Blue text" onclick="changeTextColor('blue', this)" style="background-color:blue;"></button>
+                    <button type="button" aria-label="Yellow text" onclick="changeTextColor('yellow', this)" style="background-color:yellow;"></button>
+                    <button type="button" aria-label="Purple text" onclick="changeTextColor('purple', this)" style="background-color:purple;"></button>
+                    <button type="button" aria-label="Pink text" onclick="changeTextColor('pink', this)" style="background-color:pink;"></button>
+                    <button type="button" aria-label="Orange text" onclick="changeTextColor('orange', this)" style="background-color:orange;"></button>
+                    <button type="button" aria-label="Black text" class="active" onclick="changeTextColor('black', this)" style="background-color:black;"></button>
+                    <button type="button" aria-label="Gray text" onclick="changeTextColor('gray', this)" style="background-color:gray;"></button>
+                    <button type="button" aria-label="White text" onclick="changeTextColor('white', this)" style="background-color:white;"></button>
+                </div>
+            </div>
+
+            <!-- Font Style Selector -->
+            <div id="fonts">
+                <h2>Font Style</h2>
+                <div class="font-grid">
+                    <button type="button" style="font-family: cursive;" onclick="changefontfamily('cursive', this)">Cursive</button>
+                    <button type="button" style="font-family: serif;" onclick="changefontfamily('serif', this)" class="active">Serif</button>
+                    <button type="button" class="" style="font-family: sans-serif;" onclick="changefontfamily('sans-serif', this)">Sans</button>
+                    <button type="button" style="font-family: tahoma, sans-serif;" onclick="changefontfamily('tahoma', this)">Tahoma</button>
+                    <button type="button" style="font-family: georgia, serif;" onclick="changefontfamily('georgia', this)">Georgia</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Helper to update active ring/pill highlight inside a control group
+        function setActiveButton(containerId, clickedBtn) {
+            if (!clickedBtn) return;
+            const buttons = document.querySelectorAll(`#${containerId} button`);
+            buttons.forEach(btn => btn.classList.remove('active'));
+            clickedBtn.classList.add('active');
+        }
+
+        // Preserve original function names & signatures
+        function changeBackgroundColor(clr, btn) {
+            document.getElementById("box").style.backgroundColor = clr;
+            setActiveButton("bg-color", btn);
+        }
+
+        function changeTextColor(clr, btn) {
+            document.getElementById("box").style.color = clr;
+            setActiveButton("text-color", btn);
+        }
+
+        function changefontfamily(font, btn) {
+            document.getElementById("box").style.fontFamily = font;
+            setActiveButton("fonts", btn);
+        }
+
+        // Subtle status toast feedback
+        function showStatus(text) {
+            const statusEl = document.getElementById("status-msg");
+            statusEl.textContent = text;
+            statusEl.classList.add("visible");
+            clearTimeout(statusEl._timer);
+            statusEl._timer = setTimeout(() => {
+                statusEl.classList.remove("visible");
+            }, 2600);
+        }
+
+        // Wire up #dwd-btn to export #box as a crisp high-DPI PNG image
+        document.getElementById("dwd-btn").addEventListener("click", async () => {
+            const box = document.getElementById("box");
+            const btn = document.getElementById("dwd-btn");
+            const originalHTML = btn.innerHTML;
+
+            try {
+                btn.disabled = true;
+                btn.textContent = "Exporting...";
+
+                // Temporarily remove focus ring before capture
+                box.blur();
+
+                if (typeof html2canvas === "function") {
+                    const canvas = await html2canvas(box, {
+                        scale: 2,
+                        backgroundColor: null,
+                        useCORS: true
+                    });
+                    const link = document.createElement("a");
+                    link.download = `brushify-card-${Date.now()}.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                    showStatus("Saved as PNG!");
+                } else {
+                    // Native Canvas fallback if offline
+                    const fallbackCanvas = document.createElement("canvas");
+                    fallbackCanvas.width = 720;
+                    fallbackCanvas.height = 720;
+                    const ctx = fallbackCanvas.getContext("2d");
+                    const styles = window.getComputedStyle(box);
+                    ctx.fillStyle = styles.backgroundColor || "#ffffff";
+                    ctx.fillRect(0, 0, 720, 720);
+                    ctx.fillStyle = styles.color || "#111827";
+                    ctx.font = `500 44px ${styles.fontFamily || "sans-serif"}`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(box.innerText || "Brushify", 360, 360);
+
+                    const link = document.createElement("a");
+                    link.download = `brushify-card-${Date.now()}.png`;
+                    link.href = fallbackCanvas.toDataURL("image/png");
+                    link.click();
+                    showStatus("Saved as PNG!");
+                }
+            } catch (err) {
+                console.error("Export failed:", err);
+                showStatus("Could not export image.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        });
+    </script>
+
+</body></html>
